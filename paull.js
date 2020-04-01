@@ -70,36 +70,71 @@ client.on("messageReactionAdd", async (reaction) => {
  * @param {*} reaction 
  */
 async function sendingResults(reaction) {
-  let results = await sql.get(`select * from poll where messageId = ${reaction.message.id}`)
+  let results = await getPoll(reaction)
+  let resultsEmbed = generateEmbedBegining(reaction);
+  if(results.numberOfOptions!= 2){
+    await displayResultForMultichoicePoll(results, reaction, resultsEmbed);
+  }else{
+    await displayResultForDualChoicePoll(reaction, resultsEmbed);
+  }
+   reaction.message.channel.send(resultsEmbed);
+}
+
+/**
+ * get the poll infos
+ * @param {*} reaction 
+ */
+async function getPoll(reaction) {
+  return await sql.get(`select * from poll where messageId = ${reaction.message.id}`);
+}
+
+/**
+ * display the results for dual choice polls
+ * @param {*} reaction 
+ * @param {*} resultsEmbed 
+ */
+async function displayResultForDualChoicePoll(reaction, resultsEmbed) {
+  let votes = await sql.get(`select count(*) as r from vote where pollId = ${reaction.message.id} and vote = "✅"`);
+  resultsEmbed.addField("Option : :white_check_mark:", "Nombre de votes : " + votes.r);
+  votes = await sql.get(`select count(*) as r from vote where pollId = ${reaction.message.id} and vote = "❌"`);
+  resultsEmbed.addField("Option : :x:", "Nombre de votes : " + votes.r);
+}
+
+/**
+ * display the results for multi choice polls
+ * @param {*} results 
+ * @param {*} reaction 
+ * @param {*} resultsEmbed 
+ */
+async function displayResultForMultichoicePoll(results, reaction, resultsEmbed) {
+  let = array = {
+    "1": "1️⃣",
+    "2": "2️⃣",
+    "3": "3️⃣",
+    "4": "4️⃣",
+    "5": "5️⃣",
+    "6": "6️⃣",
+    "7": "7️⃣",
+    "8": "8️⃣",
+    "9": "9️⃣",
+    "10": "🔟"
+  };
+  for (let i = 1; i <= results.numberOfOptions; i++) {
+    let votes = await sql.get(`select count(*) as r from vote where pollId = ${reaction.message.id} and vote = "${array[i]}"`);
+    resultsEmbed.addField("Option : " + array[i], "Nombre de votes : " + votes.r);
+  }
+}
+
+/**
+ * generate the start of the result embed
+ * @param {*} reaction 
+ */
+function generateEmbedBegining(reaction) {
   let resultsEmbed = new Discord.MessageEmbed();
   resultsEmbed.setTitle(":scroll: Resultat du sondage : ");
   resultsEmbed.setColor("#FFD983");
   resultsEmbed.setDescription("Cliquez ici pour retrouver le sondage : \n" + reaction.message.url);
-  if(results.numberOfOptions!= 2){
-    let = array = {
-      "1": "1️⃣",
-      "2": "2️⃣",
-      "3": "3️⃣",
-      "4": "4️⃣",
-      "5": "5️⃣",
-      "6": "6️⃣",
-      "7": "7️⃣",
-      "8": "8️⃣",
-      "9": "9️⃣",
-      "10": "🔟"
-    };
-    for (let i = 1; i <= results.numberOfOptions; i++) {
-      let votes = await sql.get(`select count(*) as r from vote where pollId = ${reaction.message.id} and vote = "${array[i]}"`)
-      resultsEmbed.addField("Option : "+ array[i],"Nombre de votes : "+ votes.r)
-    }
-  }else{
-    let votes = await sql.get(`select count(*) as r from vote where pollId = ${reaction.message.id} and vote = "✅"`)
-    resultsEmbed.addField("Option : :white_check_mark:","Nombre de votes : "+ votes.r)
-    votes = await sql.get(`select count(*) as r from vote where pollId = ${reaction.message.id} and vote = "❌"`)
-    resultsEmbed.addField("Option : :x:","Nombre de votes : "+ votes.r)
-  }
-  
-  reaction.message.channel.send(resultsEmbed);
+  return resultsEmbed;
 }
 
 /**
