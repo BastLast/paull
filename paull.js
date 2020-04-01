@@ -2,6 +2,9 @@ const Discord = require("discord.js");
 const client = new Discord.Client();
 const Config = require('./config');
 const sql = require("sqlite");
+const embed = new Discord.MessageEmbed();
+const prefix = "?s";
+
 sql.open("./database.sqlite");
 
 /**
@@ -12,9 +15,9 @@ client.on("ready", () => {
   createDatabase(sql);
 });
 
-
-const prefix = "?s";
-
+/**
+ * Will be executed each time the bot see a message
+ */
 client.on("message", async (message) => {
 
   if (isNotACommand(message)) return;
@@ -26,20 +29,191 @@ client.on("message", async (message) => {
   if (args[1] == undefined) {
     return sendQuestionErrorMessage(message)
   }
+  let msg = await repostTheQuestion(message, args);
+  await addReactions(args, msg);
+  saveNewPoll(message, msg, args);
+});
+
+/**
+ * Will be executed each time the bot see a new reaction
+ */
+client.on("messageReactionAdd", async (reaction) => {
+  if (reactionIsOnApoll(reaction)) {
+    deleteLastReaction(reaction);
+    if (reaction.me) { // test if the reaction is part of the poll
+      //if so, add it to the database
+      if (reaction.emoji.name == "📜") {
+        let pollauthorid = await sql.get(`select authorId as id from poll where messageId = ${reaction.message.id}`)
+        if (reaction.users.cache.last().id == pollauthorid.id) {
+          sendingResults(reaction);
+        } else {
+          errorStopingPoll(reaction);
+        }
+        return;
+      }
+      let numberOfVoteByThisUserOnThisPoll = await getNumberOfVote(reaction);
+      if (numberOfVoteByThisUserOnThisPoll == 0) {
+        saveVote(reaction);
+        confirmVote(reaction);
+      } else {
+        updateVote(reaction);
+        confirmChangeVote(reaction);
+      }
+    }
+  }
+});
+
+
+/**
+ * Send a dm to notify an error
+ * 
+ * @param {*} reaction 
+ */
+async function sendingResults(reaction) {
+  let results = await sql.get(`select * from poll where messageId = ${reaction.message.id}`)
+  let resultsEmbed = new Discord.MessageEmbed();
+  resultsEmbed.setTitle(":scroll: Resultat du sondage : ");
+  resultsEmbed.setColor("#FFD983");
+  resultsEmbed.setDescription("Cliquez ici pour retrouver le sondage : \n" + reaction.message.url);
+  console.log(results.numberOfOptions)
+  if(results.numberOfOptions!= 2){
+    let = array = {
+      "1": "1️⃣",
+      "2": "2️⃣",
+      "3": "3️⃣",
+      "4": "4️⃣",
+      "5": "5️⃣",
+      "6": "6️⃣",
+      "7": "7️⃣",
+      "8": "8️⃣",
+      "9": "9️⃣",
+      "10": "🔟"
+    };
+    for (let i = 1; i <= results.numberOfOptions; i++) {
+      let votes = await sql.get(`select count(*) as r from vote where pollId = ${reaction.message.id} and vote = "${array[i]}"`)
+      resultsEmbed.addField("Option : "+ array[i],"Nombre de votes : "+ votes.r)
+    }
+  }else{
+    let votes = await sql.get(`select count(*) as r from vote where pollId = ${reaction.message.id} and vote = "✅"`)
+    resultsEmbed.addField("Option : :white_check_mark:","Nombre de votes : "+ votes.r)
+    votes = await sql.get(`select count(*) as r from vote where pollId = ${reaction.message.id} and vote = "❌"`)
+    resultsEmbed.addField("Option : :x:","Nombre de votes : "+ votes.r)
+  }
+  
+  reaction.message.channel.send(resultsEmbed);
+}
+
+/**
+ * Send a dm to notify an error
+ * 
+ * @param {*} reaction 
+ */
+function errorStopingPoll(reaction) {
+  embed.setTitle(":x: Vous ne pouvez pas terminer ce sondage.");
+  embed.setColor("#D92D43");
+  embed.setDescription("Veuillez contacter la personne l'ayant lancé");
+  reaction.users.cache.last().send(embed);
+}
+
+/**
+ * Send a dm to confirm the vote was changed
+ * @param {*} reaction 
+ */
+function confirmChangeVote(reaction) {
+  embed.setTitle(":information_source: Votre vote a été modifié !");
+  embed.setColor("#3B88C3");
+  embed.setDescription("Vous votez désormais pour l'option " + reaction.emoji.name + ". Pour modifier (encore ?!) votre vote, cliquez sur une autre choix.");
+  reaction.users.cache.last().send(embed);
+}
+
+/**
+ * Send a dm to confirm the vote was saved
+ * @param {*} reaction 
+ */
+function confirmVote(reaction) {
+  embed.setTitle(":white_check_mark: Votre vote a été enregistré !");
+  embed.setColor("#77B255");
+  embed.setDescription("Vous avez voté pour l'option " + reaction.emoji.name + ". Pour modifier votre vote, cliquez sur une autre choix.");
+  reaction.users.cache.last().send(embed);
+}
+
+async function getNumberOfVote(reaction) {
+  let numberOfVoteByThisUserOnThisPoll = await sql.get(`select count(*) as number from vote where	authorId = ${reaction.users.cache.last().id} and pollId = ${reaction.message.id}`).catch(console.error);
+  numberOfVoteByThisUserOnThisPoll = numberOfVoteByThisUserOnThisPoll.number;
+  return numberOfVoteByThisUserOnThisPoll;
+}
+
+/**
+ * check if the reaction has to be considered
+ * @param {*} reaction 
+ */
+function reactionIsOnApoll(reaction) {
+  return !reaction.users.cache.last().bot && reaction.message.author.id == 694684873683894363;
+}
+
+/**
+ * delete the last reaction that was added
+ * @param {*} reaction 
+ */
+function deleteLastReaction(reaction) {
+  reaction.users.remove(reaction.users.cache.last());
+}
+
+/**
+ * Save the vote to the database
+ * @param {*} reaction 
+ */
+function saveVote(reaction) {
+  sql.run(`INSERT INTO vote (pollId, authorId, vote) VALUES (${reaction.message.id},${reaction.users.cache.last().id},"${reaction.emoji.name}")`).catch(console.error);
+}
+
+/**
+ * update the vote to the database
+ * @param {*} reaction 
+ */
+function updateVote(reaction) {
+  sql.run(`UPDATE vote set vote = "${reaction.emoji.name}" WHERE authorId = ${reaction.users.cache.last().id} and pollId = ${reaction.message.id}`).catch(console.error);
+}
+
+/**
+ * Create the poll message
+ * @param {*} message 
+ * @param {*} args 
+ */
+async function repostTheQuestion(message, args) {
   let question = getQuestion(message, args);
-  let msg = await message.channel.send(question);
+  embed.setTitle(question);
+  embed.setColor("#006D68")
+  embed.setDescription("Utilisez les réactions ci-dessous pour répondre à la question. Utilisez la réaction 📜 pour visionner les résultats si vous êtes l'initiateur du sondage.")
+  let msg = await message.channel.send(embed);
+  message.delete();
+  return msg;
+}
+
+/**
+ * add the reactions under the message
+ * @param {*} args 
+ * @param {*} msg 
+ */
+async function addReactions(args, msg) {
   if (isANumberPoll(args)) {
     await reactWithNumber(args, msg);
-  } else {
+  }
+  else {
     await reactWithYesNo(msg);
   }
-  sql.run(`INSERT INTO poll (messageId, time, numberOfOptions, one, two, three, four, five, six, seven, eight, nine, ten) VALUES (${message.id},${message.createdTimestamp},${args[0]},0,0,0,0,0,0,0,0,0,0) `).catch(console.error);
-});
+  msg.react("📜");
+}
 
-
-client.on("messageReactionAdd", async (reaction) => {
-
-});
+/**
+ * Save a new poll in the database
+ * @param {*} message 
+ * @param {*} msg
+ * @param {*} args 
+ */
+function saveNewPoll(message, msg, args) {
+  sql.run(`INSERT INTO poll (messageId, time, numberOfOptions,authorId) VALUES (${msg.id},${message.createdTimestamp},${args[0]},${message.author.id}) `).catch(console.error);
+}
 
 /**
  * get the question in a string
@@ -62,16 +236,24 @@ function getArgs(message) {
  * display an error
  * @param {*} message 
  */
-function sendArgsErrorMessage(message) {
-  return message.channel.send(":x: Veuillez choisir un nombre d'options compris entre 2 et 10 : `?s [nombre d'option] Question`");
+async function sendArgsErrorMessage(message) {
+  embed.setTitle(":x: Erreur !");
+  embed.setColor("#D92D43")
+  embed.setDescription("Veuillez choisir un nombre d'options compris entre 2 et 10 : `?s [nombre d'option] Question`")
+  msg = await message.channel.send(embed);
+  return msg.delete({ "timeout": 10000 });
 }
 
 /**
  * display an error
  * @param {*} message 
  */
-function sendQuestionErrorMessage(message) {
-  return message.channel.send(":x: Veuillez indiquer une question : `?s [nombre d'option] Question`");
+async function sendQuestionErrorMessage(message) {
+  embed.setTitle(":x: Erreur !");
+  embed.setColor("#D92D43")
+  embed.setDescription("Veuillez indiquer une question : `?s [nombre d'option] Question`")
+  msg = await message.channel.send(embed);
+  return msg.delete({ "timeout": 10000 });
 }
 
 /**
@@ -79,7 +261,7 @@ function sendQuestionErrorMessage(message) {
  * @param {*} args 
  */
 function argsIsNotValid(args) {
-  return args[0] < 2 || args[0] > 10;
+  return parseInt(args[0]) < 2 || parseInt(args[0]) > 10 || isNaN(parseInt(args[0]));
 }
 
 /**
@@ -88,7 +270,7 @@ function argsIsNotValid(args) {
  */
 async function reactWithYesNo(message) {
   await message.react("✅"),
-    message.react("❌");
+    await message.react("❌");
 }
 
 /**
@@ -129,8 +311,9 @@ function isANumberPoll(args) {
 function createDatabase(sql) {
   //first check if the database is not already there
   sql.get(`SELECT version FROM database`).catch(() => {
-    sql.run("CREATE TABLE IF NOT EXISTS poll (messageId INTEGER, time INTEGER, numberOfOptions INTEGER, one INTEGER, two INTEGER, three INTEGER, four INTEGER, five INTEGER, six INTEGER, seven INTEGER, eight INTEGER, nine INTEGER, ten INTEGER)").catch(console.error);
-    sql.run("CREATE TABLE IF NOT EXISTS database (version TEXT, lastReset INTEGER)").then(() => {
+    sql.run("CREATE TABLE IF NOT EXISTS vote (pollId INTEGER, authorId INTEGER, vote TEXT)").catch(console.error);
+    sql.run("CREATE TABLE IF NOT EXISTS poll (messageId INTEGER, time INTEGER, numberOfOptions INTEGER, authorId INTEGER)").catch(console.error);
+    sql.run("CREATE TABLE IF NOT EXISTS database (version TEXT)").then(() => {
       sql.run(`INSERT INTO database (version) VALUES (1)`).then(() => {
         console.log("... Generation Complete !");
       });
