@@ -17,6 +17,6 @@ Paull est un petit bot de sondage anonymes très simple
 Les votes sont anonymes et secrets tant que l'initiateur du sondage ne souhaite pas les dévoiler
 Il est possible de mettre de 2 à 10 options.
 
-# ourquoi mon vote est "supprimé" ?
+# Pourquoi mon vote est "supprimé" ?
 
 Quand vous votez, le bot supprime votre réaction pour que votre identité reste secrète. N'ayez crainte, votre vote a bien été sauvegardé :)
