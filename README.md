@@ -2,7 +2,7 @@
 
 Paull est un petit bot de sondage anonymes très simple
 
-#Lancer un sondage :
+# Lancer un sondage :
 
 ?s [Nombre d'options] [question]
 
