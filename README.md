@@ -1,15 +1,22 @@
-# Paull
+#Paull
 
-Paull is a very simple paul bot.
+Paull est un petit bot de sondage anonymes très simple
 
-?s Question
+#Lancer un sondage :
 
-Allow to create a simple yes / no question
+?s [Nombre d'options] [question]
 
-?s Number Question
+#Exemples :
 
-Allow to create a simple choice question.
+?s 2 Est-ce que les pandats sont mignons ?
 
-# Future.
+?s 4 De quel couleur est le cheval blanc d'henri IV ? 1: Blanc, 2: Vert, 3 Mauve, 4 Violet
 
-The bot will allow for anonymous voting :)
+#Quel est l'interet de ce bot par rapport aux autres bots de sondage ?
+
+Les votes sont anonymes et secrets tant que l'initiateur du sondage ne souhaite pas les dévoiler
+Il est possible de mettre de 2 à 10 options.
+
+#Pourquoi mon vote est "supprimé" ?
+
+Quand vous votez, le bot supprime votre réaction pour que votre identité reste secrète. N'ayez crainte, votre vote a bien été sauvegardé :)
