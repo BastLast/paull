@@ -8,7 +8,7 @@ Paull est un petit bot de sondage anonymes très simple
 
 # Exemples :
 
-?s 2 Est-ce que les pandats sont mignons ?
+?s 2 Est-ce que les pandas sont mignons ?
 
 ?s 4 De quel couleur est le cheval blanc d'henri IV ? 1: Blanc, 2: Vert, 3 Mauve, 4 Violet
 
