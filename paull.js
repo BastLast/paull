@@ -75,7 +75,6 @@ async function sendingResults(reaction) {
   resultsEmbed.setTitle(":scroll: Resultat du sondage : ");
   resultsEmbed.setColor("#FFD983");
   resultsEmbed.setDescription("Cliquez ici pour retrouver le sondage : \n" + reaction.message.url);
-  console.log(results.numberOfOptions)
   if(results.numberOfOptions!= 2){
     let = array = {
       "1": "1️⃣",
@@ -122,7 +121,7 @@ function errorStopingPoll(reaction) {
 function confirmChangeVote(reaction) {
   embed.setTitle(":information_source: Votre vote a été modifié !");
   embed.setColor("#3B88C3");
-  embed.setDescription("Vous votez désormais pour l'option " + reaction.emoji.name + ". Pour modifier (encore ?!) votre vote, cliquez sur une autre choix.");
+  embed.setDescription("Vous votez désormais pour l'option " + reaction.emoji.name + ". Pour modifier (encore ?!) votre vote, cliquez sur un autre choix.");
   reaction.users.cache.last().send(embed);
 }
 
@@ -133,7 +132,7 @@ function confirmChangeVote(reaction) {
 function confirmVote(reaction) {
   embed.setTitle(":white_check_mark: Votre vote a été enregistré !");
   embed.setColor("#77B255");
-  embed.setDescription("Vous avez voté pour l'option " + reaction.emoji.name + ". Pour modifier votre vote, cliquez sur une autre choix.");
+  embed.setDescription("Vous avez voté pour l'option " + reaction.emoji.name + ". Pour modifier votre vote, cliquez sur un autre choix.");
   reaction.users.cache.last().send(embed);
 }
 
