@@ -1,4 +1,4 @@
-/* jshint esversion: 8 */
+/* jshint esversion: 10 */
 
 const Discord = require("discord.js");
 const client = new Discord.Client();
@@ -255,7 +255,15 @@ async function repostTheQuestion(message, args) {
   embed.setTitle(question);
   embed.setColor("#006D68");
   embed.setDescription("Utilisez les réactions ci-dessous pour répondre à la question. Utilisez la réaction 📜 pour visionner les résultats si vous êtes l'initiateur du sondage.");
-  let msg = await message.channel.send(embed);
+  try {
+    let msg = await message.channel.send(embed);
+  }
+  catch{
+    embed.setTitle(":x: Erreur !");
+    embed.setColor("#D92D43");
+    embed.setDescription("La taille limite d'une question est de 256 caractères.");
+    let msg = await message.channel.send(embed)
+  }
   message.delete();
   return msg;
 }
