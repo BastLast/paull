@@ -34,7 +34,7 @@ Quand vous votez, le bot supprime votre réaction pour que votre identité reste
 
 https://discordapp.com/oauth2/authorize?client_id=694684873683894363&permissions=93248&scope=bot
 
-# Screenshots
+# Capture d'écran
 ![](https://cdn.discordapp.com/attachments/727811522306244610/728355178880958522/unknown.png)
 
 # Liens
