@@ -51,13 +51,22 @@ client.on("message", async (message) => {
  */
 client.on("messageReactionAdd", async (reaction) => {
   if (reactionIsOnApoll(reaction)) {
+    let pollexist = await sql.get(`SELECT count(*) as number from poll where messageId = ${reaction.message.id}`);
+    if (pollexist.number != 1) {
+      embed.setTitle(":x: Erreur !");
+      embed.setColor("#D92D43");
+      embed.setDescription("Ce sondage est terminé !");
+      return reaction.users.cache.last().send(embed);
+    }
     deleteLastReaction(reaction);
     if (reaction.me) { // test if the reaction is part of the poll
       //if so, add it to the database
       if (reaction.emoji.name == "📜") {
         let pollauthorid = await sql.get(`select authorId as id from poll where messageId = ${reaction.message.id}`);
         if (reaction.users.cache.last().id == pollauthorid.id) {
+
           sendingResults(reaction);
+
         } else {
           errorStopingPoll(reaction);
         }
@@ -103,6 +112,8 @@ async function sendingResults(reaction) {
     await displayResultForDualChoicePoll(reaction, resultsEmbed);
   }
   reaction.message.channel.send(resultsEmbed);
+  await sql.get(`delete from poll where messageId = ${reaction.message.id}`);
+  await sql.get(`delete from vote where pollId = ${reaction.message.id}`);
 }
 
 /**
