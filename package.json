@@ -1,6 +1,6 @@
 {
   "name": "paull",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "A simple poll discord bot",
   "main": "paull.js",
   "dependencies": {
