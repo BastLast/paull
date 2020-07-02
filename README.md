@@ -2,6 +2,15 @@
 
 Paull est un petit bot de sondage anonymes très simple
 
+<center>
+<img src="https://media.discordapp.net/attachments/727811522306244610/727845776843210793/9642a0e0df555c17dee9250b2e2c26ce.png" style="border-radius: 50%; width: 300px">
+
+
+[![](https://img.shields.io/discord/727811521819967510.svg)](https://discord.gg/J8aKYcs)
+[![](https://img.shields.io/github/stars/BastLast/Paull.svg?label=Stars&style=social)](https://github.com/BastLast/Paull)
+
+</center>
+
 # Lancer un sondage :
 
 ?s [Nombre d'options] [question]
@@ -24,3 +33,12 @@ Quand vous votez, le bot supprime votre réaction pour que votre identité reste
 # Comment inviter paull sur mon serveur ?
 
 https://discordapp.com/oauth2/authorize?client_id=694684873683894363&permissions=93248&scope=bot
+
+# Screenshots
+![](https://cdn.discordapp.com/attachments/727811522306244610/728355178880958522/unknown.png)
+
+# Liens
+* [Discord server *(in french)*](https://discord.gg/J8aKYcs)
+
+
+
