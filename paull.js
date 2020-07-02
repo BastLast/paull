@@ -20,6 +20,13 @@ client.on("ready", () => {
  */
 client.on("message", async (message) => {
 
+  if (message.mentions.users.last() && message.mentions.users.last().id == client.user.id) {
+    let embed = new Discord.MessageEmbed();
+    embed.setTitle(":information_source: Mon préfix est \"?s\"");
+    embed.setDescription("Si vous avez besoin de plus d'assistance, rejoignez le discord d'aide : https://discord.gg/GWTFMQv");
+    message.channel.send(embed);
+  }
+
   if (isNotACommand(message)) return;
 
   let args = getArgs(message);
@@ -72,12 +79,12 @@ client.on("messageReactionAdd", async (reaction) => {
 async function sendingResults(reaction) {
   let results = await getPoll(reaction)
   let resultsEmbed = generateEmbedBegining(reaction);
-  if(results.numberOfOptions!= 2){
+  if (results.numberOfOptions != 2) {
     await displayResultForMultichoicePoll(results, reaction, resultsEmbed);
-  }else{
+  } else {
     await displayResultForDualChoicePoll(reaction, resultsEmbed);
   }
-   reaction.message.channel.send(resultsEmbed);
+  reaction.message.channel.send(resultsEmbed);
 }
 
 /**
@@ -272,8 +279,8 @@ function getArgs(message) {
  */
 async function sendArgsErrorMessage(message) {
   embed.setTitle(":x: Erreur !");
-  embed.setColor("#D92D43")
-  embed.setDescription("Veuillez choisir un nombre d'options compris entre 2 et 10 : `?s [nombre d'option] Question`")
+  embed.setColor("#D92D43");
+  embed.setDescription("Veuillez choisir un nombre d'options compris entre 2 et 10 : `?s [nombre d'option] Question`");
   msg = await message.channel.send(embed);
   return msg.delete({ "timeout": 10000 });
 }
@@ -284,8 +291,8 @@ async function sendArgsErrorMessage(message) {
  */
 async function sendQuestionErrorMessage(message) {
   embed.setTitle(":x: Erreur !");
-  embed.setColor("#D92D43")
-  embed.setDescription("Veuillez indiquer une question : `?s [nombre d'option] Question`")
+  embed.setColor("#D92D43");
+  embed.setDescription("Veuillez indiquer une question : `?s [nombre d'option] Question`");
   msg = await message.channel.send(embed);
   return msg.delete({ "timeout": 10000 });
 }
