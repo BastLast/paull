@@ -1,3 +1,5 @@
+/* jshint esversion: 8 */
+
 const Discord = require("discord.js");
 const client = new Discord.Client();
 const Config = require('./config');
@@ -11,8 +13,11 @@ sql.open("./database.sqlite");
  * Will be executed whenever the bot has started
  */
 client.on("ready", () => {
-  console.log("Bot démarré :)")
+  console.log("Bot démarré :) " + client.guilds.cache.size + " serveurs !");
   createDatabase(sql);
+  client.user
+    .setActivity("?s 2 Vous allez bien ?")
+    .catch(console.error);
 });
 
 /**
@@ -31,10 +36,10 @@ client.on("message", async (message) => {
 
   let args = getArgs(message);
   if (argsIsNotValid(args)) {
-    return sendArgsErrorMessage(message)
+    return sendArgsErrorMessage(message);
   }
   if (args[1] == undefined) {
-    return sendQuestionErrorMessage(message)
+    return sendQuestionErrorMessage(message);
   }
   let msg = await repostTheQuestion(message, args);
   await addReactions(args, msg);
@@ -50,7 +55,7 @@ client.on("messageReactionAdd", async (reaction) => {
     if (reaction.me) { // test if the reaction is part of the poll
       //if so, add it to the database
       if (reaction.emoji.name == "📜") {
-        let pollauthorid = await sql.get(`select authorId as id from poll where messageId = ${reaction.message.id}`)
+        let pollauthorid = await sql.get(`select authorId as id from poll where messageId = ${reaction.message.id}`);
         if (reaction.users.cache.last().id == pollauthorid.id) {
           sendingResults(reaction);
         } else {
@@ -66,10 +71,23 @@ client.on("messageReactionAdd", async (reaction) => {
         updateVote(reaction);
         confirmChangeVote(reaction);
       }
+      await updatePollMessage(reaction);
     }
   }
 });
 
+/**
+ * used ot get the amount of vote ona poll and edit the message
+ * @param {*} reaction 
+ */
+async function updatePollMessage(reaction) {
+  let embedToEdit = reaction.message.embeds[0];
+  console.log(embedToEdit);
+  let number = await sql.get(`select count(*) as number from vote where pollId = ${reaction.message.id}`).catch(console.error);
+  number = number.number;
+  embedToEdit.setDescription("Utilisez les réactions ci-dessous pour répondre à la question. Utilisez la réaction 📜 pour visionner les résultats si vous êtes l'initiateur du sondage\n\n" + number + " vote(s) reçu(s).");
+  reaction.message.edit(embedToEdit);
+}
 
 /**
  * Send a dm to notify an error
@@ -77,7 +95,7 @@ client.on("messageReactionAdd", async (reaction) => {
  * @param {*} reaction 
  */
 async function sendingResults(reaction) {
-  let results = await getPoll(reaction)
+  let results = await getPoll(reaction);
   let resultsEmbed = generateEmbedBegining(reaction);
   if (results.numberOfOptions != 2) {
     await displayResultForMultichoicePoll(results, reaction, resultsEmbed);
@@ -224,8 +242,8 @@ function updateVote(reaction) {
 async function repostTheQuestion(message, args) {
   let question = getQuestion(message, args);
   embed.setTitle(question);
-  embed.setColor("#006D68")
-  embed.setDescription("Utilisez les réactions ci-dessous pour répondre à la question. Utilisez la réaction 📜 pour visionner les résultats si vous êtes l'initiateur du sondage.")
+  embed.setColor("#006D68");
+  embed.setDescription("Utilisez les réactions ci-dessous pour répondre à la question. Utilisez la réaction 📜 pour visionner les résultats si vous êtes l'initiateur du sondage.");
   let msg = await message.channel.send(embed);
   message.delete();
   return msg;
@@ -281,8 +299,7 @@ async function sendArgsErrorMessage(message) {
   embed.setTitle(":x: Erreur !");
   embed.setColor("#D92D43");
   embed.setDescription("Veuillez choisir un nombre d'options compris entre 2 et 10 : `?s [nombre d'option] Question`");
-  msg = await message.channel.send(embed);
-  return msg.delete({ "timeout": 10000 });
+  return message.channel.send(embed);
 }
 
 /**
@@ -293,8 +310,7 @@ async function sendQuestionErrorMessage(message) {
   embed.setTitle(":x: Erreur !");
   embed.setColor("#D92D43");
   embed.setDescription("Veuillez indiquer une question : `?s [nombre d'option] Question`");
-  msg = await message.channel.send(embed);
-  return msg.delete({ "timeout": 10000 });
+  return message.channel.send(embed);
 }
 
 /**
@@ -310,8 +326,8 @@ function argsIsNotValid(args) {
  * @param {*} message 
  */
 async function reactWithYesNo(message) {
-  await message.react("✅"),
-    await message.react("❌");
+  await message.react("✅");
+  await message.react("❌");
 }
 
 /**
