@@ -218,7 +218,7 @@ async function getNumberOfVote(reaction) {
  * @param {*} reaction 
  */
 function reactionIsOnApoll(reaction) {
-  return !reaction.users.cache.last().bot && reaction.message.author.id == 694684873683894363;
+  return !reaction.users.cache.last().bot && reaction.message.author.id == client.user.id;
 }
 
 /**
