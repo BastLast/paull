@@ -263,7 +263,7 @@ async function repostTheQuestion(message, args) {
     embed.setTitle(":x: Erreur !");
     embed.setColor("#D92D43");
     embed.setDescription("La taille limite d'une question est de 256 caractères.");
-    msg = await message.channel.send(embed)
+    msg = await message.channel.send(embed);
   }
   message.delete();
   return msg;
