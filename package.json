@@ -1,24 +1,27 @@
 {
-  "name": "paull",
-  "version": "1.0.2",
-  "description": "A simple poll discord bot",
-  "main": "paull.js",
-  "dependencies": {
-    "discord.js": "^12.1.1",
-    "sqlite": "^3.0.6"
-  },
-  "devDependencies": {},
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/BastLast/paull.git"
-  },
-  "author": "BastLast",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/BastLast/paull/issues"
-  },
-  "homepage": "https://github.com/BastLast/paull#readme"
+    "name": "paull",
+    "version": "1.0.2",
+    "description": "A simple poll discord bot",
+    "main": "paull.js",
+    "dependencies": {
+        "canvas": "^2.6.1",
+        "chart.js": "^2.9.3",
+        "chartjs-node-canvas": "^3.0.6",
+        "discord.js": "^12.1.1",
+        "sqlite": "^3.0.6"
+    },
+    "devDependencies": {},
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/BastLast/paull.git"
+    },
+    "author": "BastLast",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/BastLast/paull/issues"
+    },
+    "homepage": "https://github.com/BastLast/paull#readme"
 }
