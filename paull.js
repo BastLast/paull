@@ -115,6 +115,16 @@ async function sendingResults(reaction) {
                 ctx.fillRect(0, 0, chartInstance.chart.width, chartInstance.chart.height);
             }
         });
+
+        Chart.plugins.register({
+            beforeDraw: function(c) {
+                var legends = c.legend.legendItems;
+                legends.forEach(function(e) {
+                    e.fillStyle = 'rgb(32, 34, 37)';
+                });
+            }
+        });
+
         Chart.defaults.global.defaultFontColor = 'white';
         Chart.defaults.global.defaultFontSize = 10;
         Chart.defaults.global.defaultFontFamily = 'Montserrat';
@@ -145,7 +155,7 @@ async function sendingResults(reaction) {
             data: {
                 labels: choices,
                 datasets: [{
-                    label: 'Nombre de Votes',
+                    label: '\u200b',
                     data: data,
                     backgroundColor: random_palette(),
                     borderWidth: 0
@@ -155,7 +165,14 @@ async function sendingResults(reaction) {
                 scales: {
                     yAxes: [{
                         ticks: {
-                            beginAtZero: true
+                            beginAtZero: true,
+                            userCallback: function(label, index, labels) {
+                                // when the floored value is the same as the value we have a whole number
+                                if (Math.floor(label) === label) {
+                                    return label;
+                                }
+
+                            },
                         }
                     }]
                 }
