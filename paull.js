@@ -51,6 +51,7 @@ client.on("message", async (message) => {
  */
 client.on("messageReactionAdd", async (reaction) => {
   if (reactionIsOnApoll(reaction)) {
+    deleteLastReaction(reaction);
     let pollexist = await sql.get(`SELECT count(*) as number from poll where messageId = ${reaction.message.id}`);
     if (pollexist.number != 1) {
       embed.setTitle(":x: Erreur !");
@@ -58,7 +59,6 @@ client.on("messageReactionAdd", async (reaction) => {
       embed.setDescription("Ce sondage est terminé !");
       return reaction.users.cache.last().send(embed);
     }
-    deleteLastReaction(reaction);
     if (reaction.me) { // test if the reaction is part of the poll
       //if so, add it to the database
       if (reaction.emoji.name == "📜") {
